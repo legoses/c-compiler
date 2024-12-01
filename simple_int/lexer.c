@@ -3,11 +3,12 @@
 #include <regex.h>
 #include <ctype.h>
 #include <string.h>
+#include <stdbool.h>
 
 /*
  * TODO:
  * Add non identifier type strings as token
- * figure out why main is not being parsed as tokenn
+ * Currently crashes when printing an integer
 */
 
 // token type identifier
@@ -26,7 +27,7 @@ enum token_names {
 
 const char *TYPES[] = {"int", "return", "main"};
 const enum token_names ENUM_TYPE_LIST[] = {INT_TYPE, RETURN_KEYWORD, IDENTIFIER};
-const int NUM_TYPES = 2;
+const int NUM_TYPES = 3;
 
 // contents of token
 union token_contents {
@@ -41,7 +42,7 @@ struct token {
     union token_contents *contents;
 };
 
-const char *tokens_types[] = {"{", "}", "(", ")", ";", "int", "return"}; // Dont think i need this. Remove later
+//const char *tokens_types[] = {"{", "}", "(", ")", ";", "int", "return"}; // Dont think i need this. Remove later
 
 
 int check_for_type(char *buf, int it, struct token *t) { // recursive function to check for a data type
@@ -83,15 +84,31 @@ int fpeek(FILE **fd) {
 }
 
 
+int is_char_or_num(char c) {
+    int ch = (int)c;
+    printf("Char dec val: %i. Char val: %c\n", ch, c);
+    if((ch >= 48 && ch <= 57) //ch is a number between 0-9
+    || (ch >= 65 && ch <= 90) // ch is an upper chase chharachter
+    || (ch >= 97 && ch <= 122) // ch is a lower chase number
+    || (ch == 95)) { // c is an underscore
+        return 0;
+    }
+
+    return 1;
+}
+
+
 int parse_string(FILE **fd, char *buf, const int len) { //parse string token. returns string length
     int it = 0;
     while(!feof(*fd)) {
         int c = fgetc(*fd);
-        if((isalpha(c) != 0) || isdigit(c) != 0) {
+        //if((isalpha(c) != 0) || isdigit(c) != 0) { this will work for user defined strings, but not identifiers
+        if(is_char_or_num(c) == 0) {
             buf[it] = c;
             it++;
         }
         else {
+            ungetc(c, *fd);
             buf[it+1] = '\0'; // add null terminator for regex
             break;
         }
@@ -105,15 +122,24 @@ int parse_int(FILE **fd) { // parse integer token. Return integer
     int num = 0;
 
     while(!feof(*fd)) {
-        int c = fgetc(*fd);
+        char c = fgetc(*fd);
 
-        if(isdigit(c) != 0) {
+
+        if(isdigit(c)) {
+            printf("number found: %c\n", c);
+            int ch = (int)c - 48;
             num = num * 10;
-            num += c; // convert to integer
+            num += ch; // convert to integer
+        }
+        else {
+            ungetc(c, *fd); // backspace cursor
+            return num;
         }
     }
 
-    return num;
+    printf("Returning %i\n", num);
+
+    return num; // probably switch to error code 
 }
 
 
@@ -166,11 +192,13 @@ int begin_parse(FILE **fd, struct token *tokenArr[], const int len) {
                 t->contents->string = (char*)malloc(sizeof(bufLen));
                 printf("Regular string parsed\n");
                 strcpy(t->contents->string, buf);
+                printf("String contents:  %s\n", t->contents->string);
                 
             }
             //printf("%s\n", buf);
         }
         else if(isdigit(fpeek(fd)) != 0) { //check if token is int
+            printf("DIGIT IDENTIFIED\n");
             t = (struct token*)malloc(sizeof(struct token*));
             //printf("Integer detectd\n");
             int i_tok = parse_int(fd);
