@@ -9,6 +9,9 @@
  * TODO:
  * Currently, a struct is being allocated for each charatcter instead of each token
  * assign token when string is identified as a data type
+ * Instead of automatically allocating memory for struct in main parse loop, allocate in functions responsible for parsign contents
+ *
+ * Currently crashing when truing to print final token array
 */
 
 // token type identifier
@@ -43,6 +46,12 @@ struct token {
 };
 
 //const char *tokens_types[] = {"{", "}", "(", ")", ";", "int", "return"}; // Dont think i need this. Remove later
+
+
+//print a string with a line break
+void println(const char *s) {
+    printf("%s\n", s);
+}
 
 
 int check_for_type(char *buf, int it, struct token *t) { // recursive function to check for a data type
@@ -140,48 +149,53 @@ int parse_int(FILE **fd) { // parse integer token. Return integer
 }
 
 
-struct token* parse_char(FILE **fd, struct token *token) {
+struct token* parse_char(FILE **fd) {
     int c = fgetc(*fd);
     struct token *t = NULL;
     union token_contents *content = NULL; // 
+   
+    printf("Printing char test: %c\n", c);
     switch(c) {
         case '{':
             t = (struct token*)malloc(sizeof(struct token*));
             t->contents = (union token_contents*)malloc(sizeof(union token_contents*));
 
-            token->name = OPEN_CURLY_BRACKET;
+            t->name = OPEN_CURLY_BRACKET;
             t->contents->character = '{';
             break;
         case '}':
             t = (struct token*)malloc(sizeof(struct token*));
             t->contents = (union token_contents*)malloc(sizeof(union token_contents*));
 
-            token->name = CLOSE_CURLY_BRACKET;
+            t->name = CLOSE_CURLY_BRACKET;
             t->contents->character = '}';
             break;
         case '(':
+            println("Pre alloc test");
             t = (struct token*)malloc(sizeof(struct token*));
             t->contents = (union token_contents*)malloc(sizeof(union token_contents*));
+            println("post alloc test");
             
-            token->name = OPEN_PARANTHESIS;
+            t->name = OPEN_PARANTHESIS;
+            println("post name assign test");
             t->contents->character = '(';
             break;
         case ')':
             t = (struct token*)malloc(sizeof(struct token*));
             t->contents = (union token_contents*)malloc(sizeof(union token_contents*));
 
-            token->name = CLOSE_PARANTHESIS;
+            t->name = CLOSE_PARANTHESIS;
             t->contents->character = ')';
             break;
         case ';':
             t = (struct token*)malloc(sizeof(struct token*));
             t->contents = (union token_contents*)malloc(sizeof(union token_contents*));
 
-            token->name = SEMICOLON;
+            t->name = SEMICOLON;
             t->contents->character = ';';
             break;
     }
-    token->contents = content;
+    println("Parse char pre return");
 
     return t;
 }
@@ -194,6 +208,7 @@ int begin_parse(FILE **fd, struct token *tokenArr[], const int len) {
     int arr_pos = 0; // iterator for buffer location
 
     while(!feof(*fd)) {
+
         struct token *t = NULL; // only allocate storage if valid token is found
         if(isalpha(fpeek(fd)) != 0) { //check if this is a string
             arr_pos++;
@@ -201,6 +216,7 @@ int begin_parse(FILE **fd, struct token *tokenArr[], const int len) {
         
             int bufLen = parse_string(fd, buf, BUF_LEN);
             int token_data_type = check_for_type(buf, 0, t); // check if string is data type. Seperate string and data type parsing later
+
             if(token_data_type == -1) {
                 printf("Regular string identified\n");
                 t->name = STRING;
@@ -211,10 +227,11 @@ int begin_parse(FILE **fd, struct token *tokenArr[], const int len) {
                 printf("String contents:  %s\n", t->contents->string);
                 
             }
+
         }
         else if(isdigit(fpeek(fd)) != 0) { //check if token is int
             arr_pos++;
-            printf("DIGIT IDENTIFIED\n");
+            println("DIGIT IDENTIFIED");
             
             //allocate memory for struct and union
             t = (struct token*)malloc(sizeof(struct token*));
@@ -225,16 +242,24 @@ int begin_parse(FILE **fd, struct token *tokenArr[], const int len) {
             t->name = INTEGER_LITERAL;
         }
         else { // for now, everything else should be single character
-            //arr_pos++;
-            t = parse_char(fd, t);
+            println("Temp character identifier");
+            arr_pos++;
+            t = parse_char(fd);
+
             if(t != NULL) {
                 arr_pos++;
             }
         }
 
+        // if a token was generated, and buffer is not full, add new token to buffer
         if(t != NULL && arr_pos < len) {
+            printf("adding token to array\n");
             tokenArr[arr_pos] = t;
+            printf("Post adding token toa array\n");
         }
+
+        printf("Loop 1 buf contents: %s\n", buf);
+        it++;
     } 
 
     return arr_pos;
