@@ -7,8 +7,8 @@
 
 /*
  * TODO:
- * Add non identifier type strings as token
- * Currently crashes when printing an integer
+ * Currently, a struct is being allocated for each charatcter instead of each token
+ * assign token when string is identified as a data type
 */
 
 // token type identifier
@@ -49,9 +49,7 @@ int check_for_type(char *buf, int it, struct token *t) { // recursive function t
     regex_t re;
     int re_cmp = regcomp(&re, TYPES[it], 0);
     re_cmp = regexec(&re, buf, 0, NULL, 0);
-    //printf("Checking type...\n");
     
-    //printf("Comparing %s and %s\n", buf, TYPES[it]);
     if(re_cmp == 0) {
         union token_contents *c = (union token_contents*)malloc(sizeof(union token_contents*));
 
@@ -124,7 +122,6 @@ int parse_int(FILE **fd) { // parse integer token. Return integer
     while(!feof(*fd)) {
         char c = fgetc(*fd);
 
-
         if(isdigit(c)) {
             printf("number found: %c\n", c);
             int ch = (int)c - 48;
@@ -133,42 +130,60 @@ int parse_int(FILE **fd) { // parse integer token. Return integer
         }
         else {
             ungetc(c, *fd); // backspace cursor
+            printf("Returning %i\n", num);
             return num;
         }
     }
 
-    printf("Returning %i\n", num);
 
     return num; // probably switch to error code 
 }
 
 
-void parse_char(FILE **fd, struct token *token) {
+struct token* parse_char(FILE **fd, struct token *token) {
     int c = fgetc(*fd);
-    union token_contents *content = (union token_contents*)malloc(sizeof(union token_contents*));
+    struct token *t = NULL;
+    union token_contents *content = NULL; // 
     switch(c) {
         case '{':
+            t = (struct token*)malloc(sizeof(struct token*));
+            t->contents = (union token_contents*)malloc(sizeof(union token_contents*));
+
             token->name = OPEN_CURLY_BRACKET;
-            content->character = '{';
+            t->contents->character = '{';
             break;
         case '}':
+            t = (struct token*)malloc(sizeof(struct token*));
+            t->contents = (union token_contents*)malloc(sizeof(union token_contents*));
+
             token->name = CLOSE_CURLY_BRACKET;
-            content->character = '}';
+            t->contents->character = '}';
             break;
         case '(':
+            t = (struct token*)malloc(sizeof(struct token*));
+            t->contents = (union token_contents*)malloc(sizeof(union token_contents*));
+            
             token->name = OPEN_PARANTHESIS;
-            content->character = '(';
+            t->contents->character = '(';
             break;
         case ')':
+            t = (struct token*)malloc(sizeof(struct token*));
+            t->contents = (union token_contents*)malloc(sizeof(union token_contents*));
+
             token->name = CLOSE_PARANTHESIS;
-            content->character = ')';
+            t->contents->character = ')';
             break;
         case ';':
+            t = (struct token*)malloc(sizeof(struct token*));
+            t->contents = (union token_contents*)malloc(sizeof(union token_contents*));
+
             token->name = SEMICOLON;
-            content->character = ';';
+            t->contents->character = ';';
             break;
     }
     token->contents = content;
+
+    return t;
 }
 
 
@@ -181,8 +196,9 @@ int begin_parse(FILE **fd, struct token *tokenArr[], const int len) {
     while(!feof(*fd)) {
         struct token *t = NULL; // only allocate storage if valid token is found
         if(isalpha(fpeek(fd)) != 0) { //check if this is a string
+            arr_pos++;
             t = (struct token*)malloc(sizeof(struct token*));
-            //printf("String detected\n");
+        
             int bufLen = parse_string(fd, buf, BUF_LEN);
             int token_data_type = check_for_type(buf, 0, t); // check if string is data type. Seperate string and data type parsing later
             if(token_data_type == -1) {
@@ -195,27 +211,31 @@ int begin_parse(FILE **fd, struct token *tokenArr[], const int len) {
                 printf("String contents:  %s\n", t->contents->string);
                 
             }
-            //printf("%s\n", buf);
         }
         else if(isdigit(fpeek(fd)) != 0) { //check if token is int
+            arr_pos++;
             printf("DIGIT IDENTIFIED\n");
+            
+            //allocate memory for struct and union
             t = (struct token*)malloc(sizeof(struct token*));
-            //printf("Integer detectd\n");
-            int i_tok = parse_int(fd);
-            //printf("%i\n", i_tok);
+            t->contents = (union token_contents*)malloc(sizeof(union token_contents*));
+
+            t->contents->integer = parse_int(fd);
+            printf("post int parse\n");
+            t->name = INTEGER_LITERAL;
         }
         else { // for now, everything else should be single character
-            t = (struct token*)malloc(sizeof(struct token*));
-            parse_char(fd, t);
-            //printf("%c\n", ch);
+            //arr_pos++;
+            t = parse_char(fd, t);
+            if(t != NULL) {
+                arr_pos++;
+            }
         }
 
-        if(t != NULL) {
+        if(t != NULL && arr_pos < len) {
             tokenArr[arr_pos] = t;
-            arr_pos++;
         }
     } 
-    //printf("\n");
 
     return arr_pos;
 }
@@ -237,6 +257,7 @@ void print_tokens(struct token **arr, int len) {
                 break;
             case INTEGER_LITERAL:
                 printf("Integer token: %i\n", arr[i]->contents->integer);
+                break;
         }
     }
 }
@@ -260,10 +281,9 @@ int main(int argc, char **argv) {
     
     int num_tokens = begin_parse(&file, tokenArr, LEN);
 
-    printf("Type check test: %i\n", tokenArr[0]->name);
-
+    printf("Number of Tokens found: %i\n", num_tokens);
     print_tokens(tokenArr, num_tokens);
     fclose(file);
 
-    return 0;
+return 0;
 }
