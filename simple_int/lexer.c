@@ -132,14 +132,14 @@ int parse_int(FILE **fd) { // parse integer token. Return integer
         char c = fgetc(*fd);
 
         if(isdigit(c)) {
-            printf("number found: %c\n", c);
+            //printf("number found: %c\n", c);
             int ch = (int)c - 48;
             num = num * 10;
             num += ch; // convert to integer
         }
         else {
             ungetc(c, *fd); // backspace cursor
-            printf("Returning %i\n", num);
+            //printf("Returning %i\n", num);
             return num;
         }
     }
@@ -154,7 +154,7 @@ struct token* parse_char(FILE **fd) {
     struct token *t = NULL;
     union token_contents *content = NULL; // 
    
-    printf("Printing char test: %c\n", c);
+    //printf("Printing char test: %c\n", c);
     switch(c) {
         case '{':
             t = (struct token*)malloc(sizeof(struct token*));
@@ -208,7 +208,6 @@ int begin_parse(FILE **fd, struct token *tokenArr[], const int len) {
     int arr_pos = 0; // iterator for buffer location
 
     while(!feof(*fd)) {
-
         struct token *t = NULL; // only allocate storage if valid token is found
         if(isalpha(fpeek(fd)) != 0) { //check if this is a string
             arr_pos++;
@@ -218,16 +217,14 @@ int begin_parse(FILE **fd, struct token *tokenArr[], const int len) {
             int token_data_type = check_for_type(buf, 0, t); // check if string is data type. Seperate string and data type parsing later
 
             if(token_data_type == -1) {
-                printf("Regular string identified\n");
+                //printf("Regular string identified\n");
                 t->name = STRING;
                 t->contents = (union token_contents*)malloc(sizeof(union token_contents*));
                 t->contents->string = (char*)malloc(sizeof(bufLen));
-                printf("Regular string parsed\n");
+                //printf("Regular string parsed\n");
                 strcpy(t->contents->string, buf);
-                printf("String contents:  %s\n", t->contents->string);
-                
+                //printf("String contents:  %s\n", t->contents->string);
             }
-
         }
         else if(isdigit(fpeek(fd)) != 0) { //check if token is int
             arr_pos++;
@@ -238,12 +235,11 @@ int begin_parse(FILE **fd, struct token *tokenArr[], const int len) {
             t->contents = (union token_contents*)malloc(sizeof(union token_contents*));
 
             t->contents->integer = parse_int(fd);
-            printf("post int parse\n");
+            //printf("post int parse\n");
             t->name = INTEGER_LITERAL;
         }
         else { // for now, everything else should be single character
             println("Temp character identifier");
-            arr_pos++;
             t = parse_char(fd);
 
             if(t != NULL) {
@@ -253,9 +249,10 @@ int begin_parse(FILE **fd, struct token *tokenArr[], const int len) {
 
         // if a token was generated, and buffer is not full, add new token to buffer
         if(t != NULL && arr_pos < len) {
-            printf("adding token to array\n");
+            //printf("adding token to array\n");
             tokenArr[arr_pos] = t;
-            printf("Post adding token toa array\n");
+            printf("toekn print test: %i\n", tokenArr[arr_pos]->name);
+            //printf("Post adding token toa array\n");
         }
 
         printf("Loop 1 buf contents: %s\n", buf);
@@ -267,6 +264,7 @@ int begin_parse(FILE **fd, struct token *tokenArr[], const int len) {
 
 
 void print_tokens(struct token **arr, int len) {
+    println("Printing tokens");
     for(int i = 0; i < len; i++) {
         switch(arr[i]->name) {
             case OPEN_CURLY_BRACKET:
@@ -278,6 +276,7 @@ void print_tokens(struct token **arr, int len) {
             case INT_TYPE:
             case RETURN_KEYWORD:
             case IDENTIFIER:
+                println("test int print");
                 printf("String token: %s\n", arr[i]->contents->string);
                 break;
             case INTEGER_LITERAL:
