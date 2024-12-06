@@ -93,7 +93,7 @@ int fpeek(FILE **fd) {
 
 int is_char_or_num(char c) {
     int ch = (int)c;
-    printf("Char dec val: %i. Char val: %c\n", ch, c);
+    //printf("Char dec val: %i. Char val: %c\n", ch, c);
     if((ch >= 48 && ch <= 57) //ch is a number between 0-9
     || (ch >= 65 && ch <= 90) // ch is an upper chase chharachter
     || (ch >= 97 && ch <= 122) // ch is a lower chase number
@@ -188,6 +188,7 @@ struct token* parse_char(FILE **fd) {
             t->contents->character = ')';
             break;
         case ';':
+            println("Found semicolon");
             t = (struct token*)malloc(sizeof(struct token*));
             t->contents = (union token_contents*)malloc(sizeof(union token_contents*));
 
@@ -195,7 +196,6 @@ struct token* parse_char(FILE **fd) {
             t->contents->character = ';';
             break;
     }
-    println("Parse char pre return");
 
     return t;
 }
@@ -210,52 +210,36 @@ int begin_parse(FILE **fd, struct token *tokenArr[], const int len) {
     while(!feof(*fd)) {
         struct token *t = NULL; // only allocate storage if valid token is found
         if(isalpha(fpeek(fd)) != 0) { //check if this is a string
-            arr_pos++;
             t = (struct token*)malloc(sizeof(struct token*));
         
             int bufLen = parse_string(fd, buf, BUF_LEN);
             int token_data_type = check_for_type(buf, 0, t); // check if string is data type. Seperate string and data type parsing later
 
             if(token_data_type == -1) {
-                //printf("Regular string identified\n");
                 t->name = STRING;
                 t->contents = (union token_contents*)malloc(sizeof(union token_contents*));
                 t->contents->string = (char*)malloc(sizeof(bufLen));
-                //printf("Regular string parsed\n");
                 strcpy(t->contents->string, buf);
-                //printf("String contents:  %s\n", t->contents->string);
             }
         }
         else if(isdigit(fpeek(fd)) != 0) { //check if token is int
-            arr_pos++;
-            println("DIGIT IDENTIFIED");
-            
             //allocate memory for struct and union
             t = (struct token*)malloc(sizeof(struct token*));
             t->contents = (union token_contents*)malloc(sizeof(union token_contents*));
 
             t->contents->integer = parse_int(fd);
-            //printf("post int parse\n");
             t->name = INTEGER_LITERAL;
         }
         else { // for now, everything else should be single character
-            println("Temp character identifier");
             t = parse_char(fd);
-
-            if(t != NULL) {
-                arr_pos++;
-            }
         }
 
         // if a token was generated, and buffer is not full, add new token to buffer
         if(t != NULL && arr_pos < len) {
-            //printf("adding token to array\n");
             tokenArr[arr_pos] = t;
-            printf("toekn print test: %i\n", tokenArr[arr_pos]->name);
-            //printf("Post adding token toa array\n");
+            arr_pos++;
         }
 
-        printf("Loop 1 buf contents: %s\n", buf);
         it++;
     } 
 
@@ -264,19 +248,19 @@ int begin_parse(FILE **fd, struct token *tokenArr[], const int len) {
 
 
 void print_tokens(struct token **arr, int len) {
-    println("Printing tokens");
     for(int i = 0; i < len; i++) {
         switch(arr[i]->name) {
             case OPEN_CURLY_BRACKET:
             case CLOSE_CURLY_BRACKET:
             case OPEN_PARANTHESIS:
+            case SEMICOLON:
             case CLOSE_PARANTHESIS:
                 printf("Character token: %c\n", arr[i]->contents->character);
                 break;
             case INT_TYPE:
             case RETURN_KEYWORD:
+            case STRING:
             case IDENTIFIER:
-                println("test int print");
                 printf("String token: %s\n", arr[i]->contents->string);
                 break;
             case INTEGER_LITERAL:
@@ -306,6 +290,7 @@ int main(int argc, char **argv) {
     int num_tokens = begin_parse(&file, tokenArr, LEN);
 
     printf("Number of Tokens found: %i\n", num_tokens);
+    printf("Token name print test: %s\n", tokenArr[1]->contents->string);
     print_tokens(tokenArr, num_tokens);
     fclose(file);
 
