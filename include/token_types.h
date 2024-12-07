@@ -18,7 +18,9 @@ enum token_names {
     STRING
 };
 
-const char *TYPES[NUM_TYPES];// = {"int", "return", "main"};
-const enum token_names ENUM_TYPE_LIST[NUM_TOKEN_NAMES];// = {INT_TYPE, RETURN_KEYWORD, IDENTIFIER};
+extern const char *TYPES[NUM_TYPES]; // = {"int", "return", "main"};
+extern const enum token_names ENUM_TYPE_LIST[NUM_TOKEN_NAMES]; // = {INT_TYPE, RETURN_KEYWORD, IDENTIFIER};
+//const char *TYPES[NUM_TYPES];// = {"int", "return", "main"};
+//const enum token_names ENUM_TYPE_LIST[NUM_TOKEN_NAMES];// = {INT_TYPE, RETURN_KEYWORD, IDENTIFIER};
 
 #endif
