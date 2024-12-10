@@ -1,0 +1,72 @@
+# tokens to consider
+- Function return type
+- main function, function names in general
+- return statement
+- brackets
+- paranethesis
+
+
+struct STRING { // store values that only require a string
+    char *string;
+};
+
+
+struct INTEGER {
+    int integer;
+};
+
+
+struct FUNCTION_HEADERS {
+    enum {
+        RET_VAL,
+        PARAMETER,
+        NAME
+    } type;
+   
+    union {
+        struct STRING RET_VAL;
+        struct STRING NAME;
+        struct PARAMETER {
+            char *left; //type
+            char *right; // name
+        }
+    } data;
+};
+
+
+struct FUNCTION_BODY {
+    enum {
+        TYPE,
+        INTEGER,
+        RETURN
+    } type;
+
+    union {
+        struct TYPE 
+    } data;
+};
+
+
+struct AST {
+    enum {
+        FUNCTION,
+        MAIN_FUNCTION,
+        RETURN_TYPE,
+        INTEGER,
+        RETURN_KEYWORD,
+        RETURN_VALUE
+    } type;
+
+    union {
+        struct AST_FUNCTION {
+            struct FUNCTION_HEADERS *left; // return type
+            struct FUNCTION_BODY *right; // name, params, etc
+        } AST_FUNCTION;
+
+        struct TYPE {
+            char *type;
+        } TYPE;
+
+        struct 
+    } data;
+};
