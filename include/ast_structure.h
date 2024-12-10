@@ -1,9 +1,8 @@
-# tokens to consider
-- Function return type
-- main function, function names in general
-- return statement
-- brackets
-- paranethesis
+#ifndef AST_STRUCTURE
+#define AST_STRUCTURE
+
+
+typedef struct AST AST;
 
 
 struct STRING { // store values that only require a string
@@ -29,11 +28,12 @@ struct FUNCTION_HEADERS {
         struct PARAMETER {
             char *left; //type
             char *right; // name
-        }
+        } PARAMETER;
     } data;
 };
 
 
+/*
 struct FUNCTION_BODY {
     enum {
         TYPE,
@@ -45,21 +45,21 @@ struct FUNCTION_BODY {
         struct TYPE 
     } data;
 };
-
+*/
 
 struct AST {
     enum {
         FUNCTION,
         MAIN_FUNCTION,
         INTEGER,
-        RETURN_KEYWORD,
+        FUNCTION_RETURN,
         RETURN_VALUE
     } type;
 
     union {
         struct AST {
             struct FUNCTION_HEADERS *left; // return type
-            struct AST *right; // name, params, etc
+            struct *right; // name, params, etc
         } AST_FUNCTION;
 
         struct TYPE {
@@ -69,3 +69,6 @@ struct AST {
         struct 
     } data;
 };
+
+
+#endif

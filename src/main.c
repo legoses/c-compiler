@@ -1,4 +1,5 @@
 #include <lexer.h>
+#include <ast_structure.h>
 
 /*
  * TODO:
