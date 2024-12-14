@@ -18,6 +18,7 @@ struct INTEGER {
 struct AST_FUNCTION {
     AST *type; // return type
     AST *name; // name, params, etc
+    AST *parameters;
     AST *contents;
 };
         
@@ -33,6 +34,7 @@ struct AST {
         INTEGER,
         FUNCTION_RETURN,
         RETURN_VALUE,
+        FUNCTION_NAME
     } type;
 
     union {
