@@ -15,37 +15,16 @@ struct INTEGER {
 };
 
 
-struct FUNCTION_HEADERS {
-    enum {
-        RET_VAL,
-        PARAMETER,
-        NAME
-    } type;
-   
-    union {
-        struct STRING RET_VAL;
-        struct STRING NAME;
-        struct PARAMETER {
-            char *left; //type
-            char *right; // name
-        } PARAMETER;
-    } data;
+struct AST_FUNCTION {
+    AST *type; // return type
+    AST *name; // name, params, etc
+    AST *contents;
+};
+        
+struct TYPE {
+    char *type;
 };
 
-
-/*
-struct FUNCTION_BODY {
-    enum {
-        TYPE,
-        INTEGER,
-        RETURN
-    } type;
-
-    union {
-        struct TYPE 
-    } data;
-};
-*/
 
 struct AST {
     enum {
@@ -57,16 +36,10 @@ struct AST {
     } type;
 
     union {
-        struct AST {
-            struct FUNCTION_HEADERS *left; // return type
-            struct *right; // name, params, etc
-        } AST_FUNCTION;
-
-        struct TYPE {
-            char *type;
-        } TYPE;
-
-        struct 
+        struct AST_FUNCTION AST_FUNCTION;
+        struct INTEGER INTEGER;
+        struct STRING STRING;
+        struct TYPE TYPE;
     } data;
 };
 

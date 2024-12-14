@@ -14,6 +14,7 @@ enum token_names {
     INT_TYPE,
     RETURN_KEYWORD,
     IDENTIFIER,
+    MAIN_IDENTIFIER,
     INTEGER_LITERAL,
     STRING
 };

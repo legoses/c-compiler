@@ -53,5 +53,8 @@ int main(int argc, char **argv) {
     print_tokens(tokenArr, num_tokens);
     fclose(file);
 
+
+    create_ast(tokenArr, num_tokens);
+
     return 0;
 }
