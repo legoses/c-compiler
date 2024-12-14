@@ -1,5 +1,5 @@
 #include <lexer.h>
-#include <ast_structure.h>
+#include <ast_parser.h>
 
 /*
  * TODO:

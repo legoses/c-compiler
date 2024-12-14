@@ -1,5 +1,5 @@
 compiler: src/main.c
-	gcc ./src/main.c ./src/lexer.c ./src/token_types.c -o compiler -I/home/legoses/Documents/C/compiler/include
+	gcc ./src/main.c ./src/lexer.c ./src/token_types.c ./src/ast_parser.c -o compiler -I./include
 
 clean:
 	rm ./compiler

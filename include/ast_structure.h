@@ -32,7 +32,7 @@ struct AST {
         MAIN_FUNCTION,
         INTEGER,
         FUNCTION_RETURN,
-        RETURN_VALUE
+        RETURN_VALUE,
     } type;
 
     union {
