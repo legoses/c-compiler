@@ -38,6 +38,10 @@ AST *ast_new(AST ast) { // turns passed AST into pointer
 
 AST* create_single_keyword(char *w, int len) {
     AST *ast;
+
+    ast = ast_new((AST) {
+        RETURN_VALUE
+    })
 }
 
 
