@@ -36,7 +36,48 @@ AST *ast_new(AST ast) { // turns passed AST into pointer
 }
 
 
-AST *create_main_function(struct token *token_arr[], int pos, int len) {
+AST* create_single_keyword(char *w, int len) {
+    AST *ast;
+}
+
+
+AST *create_function(strucct token *token_arr[], int pos, int len) { //create a regular function
+    AST *ast;
+    get_num_parameters(token_arr, pos, len);
+    
+    if((token_arr[pos-1]->name == INT_TYPE) && (token_arr[pos+1]->name == OPEN_PARANTHESIS)) { // ERROR CHECK, no open paranthesis
+        printf("Creating function\n"); // test
+        //this initializes return type, name, and parameters, leaving the actual function for later
+        ast = ast_new((AST){
+            FUNCTION, //set enum tag
+            {
+                .AST_FUNCTION = (struct AST_FUNCTION) {
+                    .type = ast_new((AST){
+                        RETURN_VALUE,
+                        {.STRING = (struct STRING) {
+                            .string = (char*)malloc(sizeof(char)*3), // remember to copy in str to this value later
+                        }}
+                    }),
+                    .name = ast_new((AST) {
+                        FUNCTION_NAME,
+                        {.STRING = (struct STRING) {
+                            .string = (char*)malloc(sizeof(char)*4),
+                        }}
+                    }),
+                    .parameters = NULL,
+                }
+            }
+        });
+    }
+    else {
+        printf("Error creating main function\n");
+    }
+    
+    return ast;
+}
+
+
+AST *create_main_function(struct token *token_arr[], int pos, int len) { // ERROR CHECK, no open paranthesis
     AST *ast;
     get_num_parameters(token_arr, pos, len);
     // need to make sure pos is not the first or last index position
@@ -86,6 +127,8 @@ int create_ast(struct token *token_arr[], int len) {
     for(int i = 0; i < len; i++) {
         switch(token_arr[i]->name) {
             case FUNCTION:
+                prevLevel = currentLevel;
+                currentLeven = create_function(token_arr, i, len);
                 break;
             case RETURN_KEYWORD:
                 break;
