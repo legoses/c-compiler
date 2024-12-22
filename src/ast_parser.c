@@ -10,6 +10,17 @@ int check_type(int t, int t1) {
 }
 
 
+// requires string to have nulll terminator to accuratly determine length
+int str_len(const char *str) {
+    int i = 0;
+    while(str[i] != '\0') {
+        i++;
+    }
+
+    return i;
+}
+
+
 int get_num_parameters(struct token *token_arr[], int pos, int len) {
     int i = pos+2;
 
@@ -42,11 +53,32 @@ AST* create_return_keyword(char *w, int len) {
     ast = ast_new((AST) {
         RETURN_VALUE,
         {.STRING = (struct STRING) {
-            .string = (char*)malloc(sizeof(char)*6),
+            .string = (char*)malloc(sizeof(char)*7),
         }}
     });
 
     strncpy(ast->data.STRING.string, "return", 6);
+    ast->data.STRING.string[6] = '\0'; // add null terminator to keep inline with the rest of my string formatting
+    // oh man
+    return ast;
+}
+
+
+
+// make memory allocared more dynamic to allow for differenct length of strings. If token does not have string length, either go backa and implement in the lexer, or do it here
+AST* create_string(char *w, int len) {
+    AST *ast;
+    int strLen = str_len(w);
+
+    ast = ast_new((AST) {
+        RETURN_VALUE,
+        {.STRING = (struct STRING) {
+            .string = (char*)malloc(sizeof(char)*(strLen+1)),
+        }}
+    });
+
+    strncpy(ast->data.STRING.string, w, strLen);
+    ast->data.STRING.string[strLen+1] = '\0';
 
     return ast;
 }
