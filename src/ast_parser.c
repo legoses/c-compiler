@@ -36,16 +36,23 @@ AST *ast_new(AST ast) { // turns passed AST into pointer
 }
 
 
-AST* create_single_keyword(char *w, int len) {
+AST* create_return_keyword(char *w, int len) {
     AST *ast;
 
     ast = ast_new((AST) {
-        RETURN_VALUE
-    })
+        RETURN_VALUE,
+        {.STRING = (struct STRING) {
+            .string = (char*)malloc(sizeof(char)*6),
+        }}
+    });
+
+    strncpy(ast->data.STRING.string, "return", 6);
+
+    return ast;
 }
 
 
-AST *create_function(strucct token *token_arr[], int pos, int len) { //create a regular function
+AST *create_function(struct token *token_arr[], int pos, int len) { //create a regular function
     AST *ast;
     get_num_parameters(token_arr, pos, len);
     
@@ -116,11 +123,6 @@ AST *create_main_function(struct token *token_arr[], int pos, int len) { // ERRO
 }
 
 
-int recurse_ast(struct token *token_arr[], int len, int count) {
-
-    return 0;
-}
-
 // goign to try a recursive function for this
 int create_ast(struct token *token_arr[], int len) {
     AST *root = NULL;
@@ -132,7 +134,7 @@ int create_ast(struct token *token_arr[], int len) {
         switch(token_arr[i]->name) {
             case FUNCTION:
                 prevLevel = currentLevel;
-                currentLeven = create_function(token_arr, i, len);
+                currentLevel = create_function(token_arr, i, len);
                 break;
             case RETURN_KEYWORD:
                 break;

@@ -5,6 +5,7 @@
 #include <token_type.h>
 #include <stdlib.h>
 #include <stdio.h>
+#include <string.h>
 
 
 int check_type(int t, int t1);
