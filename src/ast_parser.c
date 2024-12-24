@@ -99,10 +99,11 @@ int count_func_contents(struct token *token_arr[], int pos, int len) { // get th
     return num;
 }
 
-/*
-AST *create_function(struct token *token_arr[], int pos, int len) { //create a regular function
+
+AST *create_function(struct token *token_arr[], int pos, int len) { //create a regular function. Only allocates memory, does not parse parameters or function contents
     AST *ast;
-    get_num_parameters(token_arr, pos, len);
+    int params = get_num_parameters(token_arr, pos, len);
+    int contents = count_func_contents(token_arr, pos, len);
     
     if((token_arr[pos-1]->name == INT_TYPE) && (token_arr[pos+1]->name == OPEN_PARANTHESIS)) { // ERROR CHECK, no open paranthesis
         printf("Creating function\n"); // test
@@ -111,6 +112,8 @@ AST *create_function(struct token *token_arr[], int pos, int len) { //create a r
             FUNCTION, //set enum tag
             {
                 .AST_FUNCTION = (struct AST_FUNCTION) {
+                    .param_count = params,
+                    .content_count = contents,
                     .type = ast_new((AST){
                         RETURN_VALUE,
                         {.STRING = (struct STRING) {
@@ -123,7 +126,8 @@ AST *create_function(struct token *token_arr[], int pos, int len) { //create a r
                             .string = (char*)malloc(sizeof(char)*4),
                         }}
                     }),
-                    .parameters = NULL,
+                    .parameters = (AST**)malloc(sizeof(AST*)*params),
+                    .contents = (AST**)malloc(sizeof(AST*)*contents) // experimental to allocate size of 
                 }
             }
         });
@@ -134,43 +138,8 @@ AST *create_function(struct token *token_arr[], int pos, int len) { //create a r
     
     return ast;
 }
-*/
 
 
-void create_function(struct token *token_arr[], int pos, int len) { //create a regular function
-    AST *ast;
-    get_num_parameters(token_arr, pos, len);
-    
-    if((token_arr[pos-1]->name == INT_TYPE) && (token_arr[pos+1]->name == OPEN_PARANTHESIS)) { // ERROR CHECK, no open paranthesis
-        printf("Creating function\n"); // test
-        //this initializes return type, name, and parameters, leaving the actual function for later
-        ast = ast_new((AST){
-            FUNCTION, //set enum tag
-            {
-                .AST_FUNCTION = (struct AST_FUNCTION) {
-                    .type = ast_new((AST){
-                        RETURN_VALUE,
-                        {.STRING = (struct STRING) {
-                            .string = (char*)malloc(sizeof(char)*3), // remember to copy in str to this value later
-                        }}
-                    }),
-                    .name = ast_new((AST) {
-                        FUNCTION_NAME,
-                        {.STRING = (struct STRING) {
-                            .string = (char*)malloc(sizeof(char)*4),
-                        }}
-                    }),
-                    .parameters = NULL,
-                }
-            }
-        });
-    }
-    else {
-        printf("Error creating main function\n");
-    }
-    
-    return ast;
-}
 
 AST *create_main_function(struct token *token_arr[], int pos, int len) { // ERROR CHECK, no open paranthesis
     AST *ast;
@@ -214,12 +183,15 @@ int create_ast(struct token *token_arr[], int len) {
     AST *currentLevel = NULL;
 
 
+    // need to figure out a way to properly keep track of position. For example, parsing function contents, being able to go deep into if statements, and still be able to return to proper level
+    // to parse rest of funtion contents
+
     for(int i = 0; i < len; i++) {
         switch(token_arr[i]->name) {
             case FUNCTION:
                 prevLevel = currentLevel;
                 currentLevel = create_function(token_arr, i, len);
-                prevLevel->data
+                prevLevel->data;
                 break;
             case RETURN_KEYWORD:
                 break;

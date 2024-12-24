@@ -16,9 +16,11 @@ struct INTEGER {
 
 
 struct AST_FUNCTION {
+    int param_count;
+    int content_count;
     AST *type; // return type
     AST *name; // name, params, etc
-    AST *parameters;
+    AST **parameters;
     AST **contents; // look ahead to figure out how many contents are in the function, then alloc memory for array?
 };
         

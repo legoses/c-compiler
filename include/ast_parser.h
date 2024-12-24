@@ -11,6 +11,7 @@
 int check_type(int t, int t1);
 int get_num_parameters(struct token *token_arr[], int pos, int len);
 int str_len(const char *str);
+int count_func_contents(struct token *token_arr[], int pos, int len);
 AST* create_string(char *w, int len);
 AST *ast_new(AST ast);
 int recurse_ast(struct token *token_arr[], int len, int count);
