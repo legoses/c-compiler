@@ -84,6 +84,22 @@ AST* create_string(char *w, int len) {
 }
 
 
+int count_func_contents(struct token *token_arr[], int pos, int len) { // get the amount of tokens stored in function
+    int num = 0;
+    int i = pos;
+    
+    // for now, just count lines ending with semicolon until the next closing curley bracket is found
+    while(token_arr[i]->name != CLOSE_CURLY_BRACKET && i < len) {
+        if (token_arr[i]->name == SEMICOLON) {
+            num++;
+        }
+        i++;
+    }
+
+    return num;
+}
+
+/*
 AST *create_function(struct token *token_arr[], int pos, int len) { //create a regular function
     AST *ast;
     get_num_parameters(token_arr, pos, len);
@@ -118,7 +134,43 @@ AST *create_function(struct token *token_arr[], int pos, int len) { //create a r
     
     return ast;
 }
+*/
 
+
+void create_function(struct token *token_arr[], int pos, int len) { //create a regular function
+    AST *ast;
+    get_num_parameters(token_arr, pos, len);
+    
+    if((token_arr[pos-1]->name == INT_TYPE) && (token_arr[pos+1]->name == OPEN_PARANTHESIS)) { // ERROR CHECK, no open paranthesis
+        printf("Creating function\n"); // test
+        //this initializes return type, name, and parameters, leaving the actual function for later
+        ast = ast_new((AST){
+            FUNCTION, //set enum tag
+            {
+                .AST_FUNCTION = (struct AST_FUNCTION) {
+                    .type = ast_new((AST){
+                        RETURN_VALUE,
+                        {.STRING = (struct STRING) {
+                            .string = (char*)malloc(sizeof(char)*3), // remember to copy in str to this value later
+                        }}
+                    }),
+                    .name = ast_new((AST) {
+                        FUNCTION_NAME,
+                        {.STRING = (struct STRING) {
+                            .string = (char*)malloc(sizeof(char)*4),
+                        }}
+                    }),
+                    .parameters = NULL,
+                }
+            }
+        });
+    }
+    else {
+        printf("Error creating main function\n");
+    }
+    
+    return ast;
+}
 
 AST *create_main_function(struct token *token_arr[], int pos, int len) { // ERROR CHECK, no open paranthesis
     AST *ast;
@@ -167,6 +219,7 @@ int create_ast(struct token *token_arr[], int len) {
             case FUNCTION:
                 prevLevel = currentLevel;
                 currentLevel = create_function(token_arr, i, len);
+                prevLevel->data
                 break;
             case RETURN_KEYWORD:
                 break;

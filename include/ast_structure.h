@@ -19,7 +19,7 @@ struct AST_FUNCTION {
     AST *type; // return type
     AST *name; // name, params, etc
     AST *parameters;
-    AST *contents;
+    AST **contents; // look ahead to figure out how many contents are in the function, then alloc memory for array?
 };
         
 struct TYPE {
