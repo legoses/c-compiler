@@ -17,6 +17,7 @@ AST *ast_new(AST ast);
 int recurse_ast(struct token *token_arr[], int len, int count);
 AST* create_return_keyword(char *w, int len);
 AST *create_main_function(struct token *token_arr[], int pos, int len);
+int add_ast_contents(AST **ast_arr, AST *ast, int &pos, int len); // add contents to array. Makes sure position is within arr length
 int create_ast(struct token *token_arr[], int len);
 
 

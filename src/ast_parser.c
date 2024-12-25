@@ -27,7 +27,12 @@ int get_num_parameters(struct token *token_arr[], int pos, int len) {
     if(check_type(token_arr[pos+1]->name, OPEN_PARANTHESIS) == 0) {
 
         while(i < len && check_type(token_arr[i]->name, CLOSE_PARANTHESIS) != 0) {
-            i++;
+            if((token_arr[i]->name != INT_TYPE) || (token_arr[i]->name != STRING)) { // add comma check later
+                i++;
+            }
+            else {
+                return -1;
+            }
         }
     }
     
@@ -47,6 +52,7 @@ AST *ast_new(AST ast) { // turns passed AST into pointer
 }
 
 
+/*
 AST* create_return_keyword(char *w, int len) {
     AST *ast;
 
@@ -62,7 +68,7 @@ AST* create_return_keyword(char *w, int len) {
     // oh man
     return ast;
 }
-
+*/
 
 
 // make memory allocared more dynamic to allow for differenct length of strings. If token does not have string length, either go backa and implement in the lexer, or do it here
@@ -84,11 +90,17 @@ AST* create_string(char *w, int len) {
 }
 
 
+AST* create_return() {
+    return create_string("return", 6);
+}
+
+
 int count_func_contents(struct token *token_arr[], int pos, int len) { // get the amount of tokens stored in function
     int num = 0;
     int i = pos;
     
     // for now, just count lines ending with semicolon until the next closing curley bracket is found
+    // Later, probably dont count nested contents, like if statment contents, as part of function content
     while(token_arr[i]->name != CLOSE_CURLY_BRACKET && i < len) {
         if (token_arr[i]->name == SEMICOLON) {
             num++;
@@ -140,10 +152,10 @@ AST *create_function(struct token *token_arr[], int pos, int len) { //create a r
 }
 
 
-
 AST *create_main_function(struct token *token_arr[], int pos, int len) { // ERROR CHECK, no open paranthesis
     AST *ast;
-    get_num_parameters(token_arr, pos, len);
+    int params = get_num_parameters(token_arr, pos, len);
+    int contents = count_func_contents(token_arr, pos, len);
     // need to make sure pos is not the first or last index position
     if((token_arr[pos-1]->name == INT_TYPE) && (token_arr[pos+1]->name == OPEN_PARANTHESIS)) {
         printf("Creating main function\n"); // test
@@ -176,6 +188,18 @@ AST *create_main_function(struct token *token_arr[], int pos, int len) { // ERRO
 }
 
 
+int add_ast_contents(AST **ast_arr, AST *ast, int &pos, int len) {
+    if(pos < len) {
+        ast_arr[pos] = ast;
+        pos++;
+
+        return 0;
+    }
+
+    return -1;
+}
+
+
 // goign to try a recursive function for this
 int create_ast(struct token *token_arr[], int len) {
     AST *root = NULL;
@@ -194,10 +218,13 @@ int create_ast(struct token *token_arr[], int len) {
                 prevLevel->data;
                 break;
             case RETURN_KEYWORD:
+                 
                 break;
             case IDENTIFIER:
+                printf("Identifier detected\n");
                 break;
             case STRING:
+                printf("String detected\n");
                 break;
             case MAIN_IDENTIFIER: //create root struct, and assign to current level
                 root = create_main_function(token_arr, i, len);
