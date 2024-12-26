@@ -10,7 +10,7 @@ int check_type(int t, int t1) {
 }
 
 
-// requires string to have nulll terminator to accuratly determine length
+// requires string to have null terminator to accuratly determine length
 int str_len(const char *str) {
     int i = 0;
     while(str[i] != '\0') {
@@ -91,7 +91,9 @@ AST* create_string(char *w, int len) {
 
 
 AST* create_return() {
-    return create_string("return", 6);
+    //return create_string("return", 6);
+    // maybe check for type of next token and store in the return ast tree
+    AST *ast = ast_new(); // ???
 }
 
 
@@ -188,7 +190,7 @@ AST *create_main_function(struct token *token_arr[], int pos, int len) { // ERRO
 }
 
 
-int add_ast_contents(AST **ast_arr, AST *ast, int &pos, int len) {
+int add_ast_contents(AST **ast_arr, AST *ast, int *pos, int len) {
     if(pos < len) {
         ast_arr[pos] = ast;
         pos++;
@@ -205,6 +207,7 @@ int create_ast(struct token *token_arr[], int len) {
     AST *root = NULL;
     AST *prevLevel = NULL;
     AST *currentLevel = NULL;
+    int func_pos = 0;
 
 
     // need to figure out a way to properly keep track of position. For example, parsing function contents, being able to go deep into if statements, and still be able to return to proper level
@@ -218,10 +221,13 @@ int create_ast(struct token *token_arr[], int len) {
                 prevLevel->data;
                 break;
             case RETURN_KEYWORD:
-                 
+                AST *ast = create_return();
+                add_ast_contents(currentLevel->contents, ast, &func_pos, len);
+                func_pos++; 
+
                 break;
             case IDENTIFIER:
-                printf("Identifier detected\n");
+                printf("Identifier detected\n");l
                 break;
             case STRING:
                 printf("String detected\n");
