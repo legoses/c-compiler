@@ -77,7 +77,7 @@ AST* create_string(char *w, int len) {
     int strLen = str_len(w);
 
     ast = ast_new((AST) {
-        RETURN_VALUE,
+        STRING,
         {.STRING = (struct STRING) {
             .string = (char*)malloc(sizeof(char)*(strLen+1)),
         }}
@@ -93,16 +93,16 @@ AST* create_string(char *w, int len) {
 AST* create_return() {
     //return create_string("return", 6);
     // maybe check for type of next token and store in the return ast tree
-    AST *ast = ast_new((AST){
-       RETURN_VALUE,
-        {
-            .STRING = (struct STRING) {
-                .string = (char*)malloc(sizeof(char)*6) // create a string struct & allocate memory for return;
-            }
-        }
-    });
+    AST *ast = create_string("return", 6);
+    ast->type = RETURN_VALUE;
+    return ast;
+}
 
-    strncpy(ast->data.STRING.string, "return", 6);
+
+AST* create_ast_identifier(char *s) {
+    int len = str_len(s);
+    AST *ast = create_string(s, len);
+    ast->type = IDENTIFIER;
 
     return ast;
 }
@@ -158,7 +158,7 @@ AST *create_function(struct token *token_arr[], int pos, int len) { //create a r
         });
     }
     else {
-        printf("Error creating main function\n");
+        printf("Error creating function\n");
     }
     
     return ast;
@@ -204,7 +204,7 @@ AST *create_main_function(struct token *token_arr[], int pos, int len) { // ERRO
 int add_ast_contents(AST **ast_arr, AST *ast, int *pos, int len) {
     if(*pos < len) {
         ast_arr[*pos] = ast;
-        pos++;
+        //pos++;
 
         return 0;
     }
@@ -220,25 +220,29 @@ int create_ast(struct token *token_arr[], int len) {
     AST *currentLevel = NULL;
     int func_pos = 0;
 
-
     // need to figure out a way to properly keep track of position. For example, parsing function contents, being able to go deep into if statements, and still be able to return to proper level
     // to parse rest of funtion contents
-
     for(int i = 0; i < len; i++) {
         switch(token_arr[i]->name) {
             case FUNCTION:
                 prevLevel = currentLevel;
                 currentLevel = create_function(token_arr, i, len);
-                prevLevel->data;
+                //prevLevel->data;
                 break;
             case RETURN_KEYWORD:
+                // add something here to break off the function and create new ast statment
                 AST *ast = create_return();
-                add_ast_contents(currentLevel->data.AST_FUNCTION.contents, ast, &func_pos, len);
-                func_pos++; 
+                if(add_ast_contents(currentLevel->data.AST_FUNCTION.contents, ast, &func_pos, len) >= 0) {
+                    func_pos++;
+                }
 
                 break;
             case IDENTIFIER:
                 printf("Identifier detected\n");
+                // create ast and add to array all at once
+                if (add_ast_contents(currentLevel->data.AST_FUNCTION.contents, create_ast_identifier(), &func_pos, len) >= 0) {
+                    func_pos++;
+                }
                 break;
             case STRING:
                 printf("String detected\n");
@@ -248,7 +252,6 @@ int create_ast(struct token *token_arr[], int len) {
                 currentLevel = root;
                 break;
         }
-        
     }
 
     return 0;
