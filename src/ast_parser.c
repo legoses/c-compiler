@@ -93,7 +93,18 @@ AST* create_string(char *w, int len) {
 AST* create_return() {
     //return create_string("return", 6);
     // maybe check for type of next token and store in the return ast tree
-    AST *ast = ast_new(); // ???
+    AST *ast = ast_new((AST){
+       RETURN_VALUE,
+        {
+            .STRING = (struct STRING) {
+                .string = (char*)malloc(sizeof(char)*6) // create a string struct & allocate memory for return;
+            }
+        }
+    });
+
+    strncpy(ast->data.STRING.string, "return", 6);
+
+    return ast;
 }
 
 
@@ -191,8 +202,8 @@ AST *create_main_function(struct token *token_arr[], int pos, int len) { // ERRO
 
 
 int add_ast_contents(AST **ast_arr, AST *ast, int *pos, int len) {
-    if(pos < len) {
-        ast_arr[pos] = ast;
+    if(*pos < len) {
+        ast_arr[*pos] = ast;
         pos++;
 
         return 0;
@@ -222,12 +233,12 @@ int create_ast(struct token *token_arr[], int len) {
                 break;
             case RETURN_KEYWORD:
                 AST *ast = create_return();
-                add_ast_contents(currentLevel->contents, ast, &func_pos, len);
+                add_ast_contents(currentLevel->data.AST_FUNCTION.contents, ast, &func_pos, len);
                 func_pos++; 
 
                 break;
             case IDENTIFIER:
-                printf("Identifier detected\n");l
+                printf("Identifier detected\n");
                 break;
             case STRING:
                 printf("String detected\n");
