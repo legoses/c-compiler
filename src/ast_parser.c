@@ -118,10 +118,45 @@ int count_func_contents(struct token *token_arr[], int pos, int len) { // get th
         if (token_arr[i]->name == SEMICOLON) {
             num++;
         }
-        i++;
     }
 
     return num;
+}
+
+
+int populate_ast_function(AST *ast, int contents) {
+    for(int i = 0; i < contents; i++) {
+        switch(token_arr[i]->name) {
+            case RETURN_KEYWORD:
+                // add something here to break off the function and create new ast statment
+                AST *ret_ast = create_return();
+                if(add_ast_contents(ast->data.AST_FUNCTION.contents, ast, &i, len) >= 0) {
+                    func_pos++;
+                }
+
+                break;
+            case IDENTIFIER:
+                printf("Identifier detected\n");
+                // create ast and add to array all at once
+                if (add_ast_contents(ast->data.AST_FUNCTION.contents, create_ast_identifier(), &i, len) >= 0) {
+                    func_pos++;
+                }
+                break;
+            case STRING:
+                printf("String detected\n");
+                break;
+            case MAIN_IDENTIFIER: //create root struct, and assign to current level
+                root = create_main_function(token_arr, i, len);
+                currentLevel = root;
+                break;
+            default:
+                printf("Error: Unextected declaration type. Quitting...\n");
+                return -1;
+        }
+    }
+
+
+    return 0;
 }
 
 
@@ -156,6 +191,8 @@ AST *create_function(struct token *token_arr[], int pos, int len) { //create a r
                 }
             }
         });
+
+        populate_ast_function(ast, contents);
     }
     else {
         printf("Error creating function\n");
@@ -213,6 +250,9 @@ int add_ast_contents(AST **ast_arr, AST *ast, int *pos, int len) {
 }
 
 
+// when a function is detected, enter this function to automatically add contents to proper array
+
+
 // goign to try a recursive function for this
 int create_ast(struct token *token_arr[], int len) {
     AST *root = NULL;
@@ -222,11 +262,24 @@ int create_ast(struct token *token_arr[], int len) {
 
     // need to figure out a way to properly keep track of position. For example, parsing function contents, being able to go deep into if statements, and still be able to return to proper level
     // to parse rest of funtion contents
+
+    /*
+     * General flow of paresr:
+     * On function detection, parser will determine how many top level items are in the function and allocate memory
+     * for those in the contents array. The end of a function will be determined by a return statment, or the close
+     * curley bracket
+    */
     for(int i = 0; i < len; i++) {
         switch(token_arr[i]->name) {
             case FUNCTION:
                 prevLevel = currentLevel;
                 currentLevel = create_function(token_arr, i, len);
+
+                if(currentLevel == NULL) {
+                    // call funciton to deallocate memory
+                    return -1;
+                }
+                //populate_ast_function(currentLevel, &len);
                 //prevLevel->data;
                 break;
             case RETURN_KEYWORD:
