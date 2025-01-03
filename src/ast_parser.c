@@ -90,19 +90,36 @@ AST* create_string(char *w, int len) {
 }
 
 
-AST* create_return() {
-    //return create_string("return", 6);
-    // maybe check for type of next token and store in the return ast tree
-    AST *ast = create_string("return", 6);
-    ast->type = RETURN_VALUE;
+
+//used for variable names I think
+AST* create_ast_identifier(struct token *token) {
+    AST *ast = NULL;
+
+    //create IDENTIFIER ast, or return NULL if recieved token is not an identifier
+    if(token->name == IDENTIFIER) {
+        ast = create_string(token->contents->string, str_len(token->contents->string));
+        ast->type = IDENTIFIER;
+        return ast;
+    }
+
     return ast;
 }
 
 
-AST* create_ast_identifier(char *s) {
-    int len = str_len(s);
-    AST *ast = create_string(s, len);
-    ast->type = IDENTIFIER;
+AST* create_return(struct token *token_arr[], int pos, int len) {
+    //return create_string("return", 6);
+    // maybe check for type of next token and store in the return ast tree
+   
+    AST *ast = NULL;
+
+    // Allocate AST based on what kind of content function is returning
+    if((pos+1) < len) {
+        int pos1 = pos+1;
+        if(token_arr[pos1]->name == INTEGER_LITERAL) {
+
+        }
+
+    }
 
     return ast;
 }
@@ -124,30 +141,30 @@ int count_func_contents(struct token *token_arr[], int pos, int len) { // get th
 }
 
 
-int populate_ast_function(AST *ast, int contents) {
-    for(int i = 0; i < contents; i++) {
+
+//remember to add iteration to position variable after loop is finished
+int populate_ast_function(struct token *token_arr[], int pos, AST *ast, int len) {
+    for(int i = pos; i < len; i++) {
         switch(token_arr[i]->name) {
             case RETURN_KEYWORD:
                 // add something here to break off the function and create new ast statment
-                AST *ret_ast = create_return();
-                if(add_ast_contents(ast->data.AST_FUNCTION.contents, ast, &i, len) >= 0) {
-                    func_pos++;
+                AST *ret_ast = create_return(token_arr, pos, len);
+                if (add_ast_contents(ast->data.AST_FUNCTION.contents, ret_ast, &i, len) < 0) {
+                    return -1;
                 }
 
                 break;
             case IDENTIFIER:
                 printf("Identifier detected\n");
                 // create ast and add to array all at once
-                if (add_ast_contents(ast->data.AST_FUNCTION.contents, create_ast_identifier(), &i, len) >= 0) {
-                    func_pos++;
+                if (add_ast_contents(ast->data.AST_FUNCTION.contents, create_ast_identifier(token_arr[i]), &i, len) < 0) {
+                    return -1;
                 }
                 break;
             case STRING:
                 printf("String detected\n");
                 break;
             case MAIN_IDENTIFIER: //create root struct, and assign to current level
-                root = create_main_function(token_arr, i, len);
-                currentLevel = root;
                 break;
             default:
                 printf("Error: Unextected declaration type. Quitting...\n");
@@ -192,7 +209,7 @@ AST *create_function(struct token *token_arr[], int pos, int len) { //create a r
             }
         });
 
-        populate_ast_function(ast, contents);
+        populate_ast_function(token_arr, pos, ast, contents);
     }
     else {
         printf("Error creating function\n");
@@ -208,6 +225,8 @@ AST *create_main_function(struct token *token_arr[], int pos, int len) { // ERRO
     int contents = count_func_contents(token_arr, pos, len);
     // need to make sure pos is not the first or last index position
     if((token_arr[pos-1]->name == INT_TYPE) && (token_arr[pos+1]->name == OPEN_PARANTHESIS)) {
+        enum token_names main_ret = token_arr[pos-1]->name; // save the function return type so it can be referenced later
+
         printf("Creating main function\n"); // test
         //this initializes return type, name, and parameters, leaving the actual function for later
         ast = ast_new((AST){
@@ -230,6 +249,8 @@ AST *create_main_function(struct token *token_arr[], int pos, int len) { // ERRO
                 }
             }
         });
+
+        populate_ast_function(token_arr, pos, ast, contents);
     }
     else {
         printf("Error creating main function\n");
@@ -284,7 +305,7 @@ int create_ast(struct token *token_arr[], int len) {
                 break;
             case RETURN_KEYWORD:
                 // add something here to break off the function and create new ast statment
-                AST *ast = create_return();
+                AST *ast = create_return(token_arr, i, len);
                 if(add_ast_contents(currentLevel->data.AST_FUNCTION.contents, ast, &func_pos, len) >= 0) {
                     func_pos++;
                 }
@@ -293,7 +314,7 @@ int create_ast(struct token *token_arr[], int len) {
             case IDENTIFIER:
                 printf("Identifier detected\n");
                 // create ast and add to array all at once
-                if (add_ast_contents(currentLevel->data.AST_FUNCTION.contents, create_ast_identifier(), &func_pos, len) >= 0) {
+                if (add_ast_contents(currentLevel->data.AST_FUNCTION.contents, create_ast_identifier(token_arr[i]), &func_pos, len) >= 0) {
                     func_pos++;
                 }
                 break;

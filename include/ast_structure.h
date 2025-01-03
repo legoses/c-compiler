@@ -23,7 +23,8 @@ struct AST_FUNCTION {
     AST **parameters;
     AST **contents; // look ahead to figure out how many contents are in the function, then alloc memory for array?
 };
-        
+
+
 struct TYPE {
     char *type;
 };
