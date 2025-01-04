@@ -8,6 +8,8 @@
 #include <string.h>
 
 
+struct token *consume_token(struct token *token_arr[], int len);
+AST create_ast_main_function(struct token *token, int pos, int len);
 int create_ast(struct token *token_arr[], int len);
 
 

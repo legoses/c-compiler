@@ -15,6 +15,13 @@ struct INTEGER {
 };
 
 
+//store parameter data type and name
+struct AST_FUNCTION_PARAMS {
+    char *type; 
+    char *name;
+};
+
+
 struct AST_FUNCTION {
     int param_count;
     int content_count;
@@ -23,6 +30,7 @@ struct AST_FUNCTION {
     AST **parameters;
     AST **contents; // look ahead to figure out how many contents are in the function, then alloc memory for array?
 };
+
 
 
 struct TYPE {
@@ -45,6 +53,7 @@ struct AST {
         struct INTEGER INTEGER;
         struct STRING STRING;
         struct TYPE TYPE;
+        struct AST_FUNCTION_PARAMS AST_FUNCTION_PARAMS;
     } data;
 };
 
