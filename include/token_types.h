@@ -5,6 +5,7 @@
 #define NUM_TOKEN_NAMES 3
 
 // token type identifier
+// data types need to have a singple enum name. Acuall type can be determined by something like a stored string, or a seoerate enum
 enum token_names {
     OPEN_CURLY_BRACKET,
     CLOSE_CURLY_BRACKET,
@@ -12,6 +13,7 @@ enum token_names {
     CLOSE_PARANTHESIS,
     SEMICOLON,
     INT_TYPE,
+    CHAR_TYPE,
     RETURN_KEYWORD,
     IDENTIFIER,
     MAIN_IDENTIFIER,

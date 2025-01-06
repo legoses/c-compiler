@@ -15,5 +15,7 @@ void Token_init(Token *token, struct token **arr, int len);
 Token *Token_new(struct token **arr, int len);
 int Token_inc(Token *token);
 int Token_dec(Token *token);
+int Token_inc_num(Token *token, int num);
+int Token_dec_num(Token *token, int num);
 
 #endif
