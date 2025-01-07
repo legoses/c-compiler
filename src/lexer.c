@@ -145,6 +145,14 @@ struct token* parse_char(FILE **fd) {
             t->name = SEMICOLON;
             t->contents->character = ';';
             break;
+        case ',':
+            println("Found comma");
+            t = (struct token*)malloc(sizeof(struct token*));
+            t->contents = (union token_contents*)malloc(sizeof(union token_contents*));
+
+            t->name = COMMA;
+            t->contents->character = ',';
+            break;
     }
 
     return t;

@@ -25,9 +25,9 @@ struct AST_FUNCTION_PARAMS {
 struct AST_FUNCTION {
     int param_count;
     int content_count;
-    AST *type; // return type
-    AST *name; // name, params, etc
-    AST **parameters;
+    struct STRING *type; // return type
+    struct STRING *name; // name, params, etc
+    struct AST_FUNCTION_PARAMS **parameters;
     AST **contents; // look ahead to figure out how many contents are in the function, then alloc memory for array?
 };
 
@@ -53,7 +53,6 @@ struct AST {
         struct INTEGER INTEGER;
         struct STRING STRING;
         struct TYPE TYPE;
-        struct AST_FUNCTION_PARAMS AST_FUNCTION_PARAMS;
     } data;
 };
 

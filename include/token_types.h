@@ -18,7 +18,8 @@ enum token_names {
     IDENTIFIER,
     MAIN_IDENTIFIER,
     INTEGER_LITERAL,
-    STRING
+    STRING,
+    COMMA
 };
 
 extern const char *TYPES[NUM_TYPES]; // = {"int", "return", "main"};

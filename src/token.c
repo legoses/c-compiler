@@ -46,7 +46,7 @@ int Token_dec(Token *token) {
 
 int Token_inc_num(Token *token, int num) {
     for(int i = 0; i < num; i++) {
-        if(Token_inc(&token) != 0) {
+        if(Token_inc(token) != 0) {
             return -1;
         }
     }
@@ -56,7 +56,7 @@ int Token_inc_num(Token *token, int num) {
 
 int Token_dec_num(Token *token, int num) {
     for(int i = num; i > 0; i--) {
-        if(Token_dec(&token) != 0) {
+        if(Token_dec(token) != 0) {
             return -1;
         }
     }
