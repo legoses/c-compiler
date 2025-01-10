@@ -11,6 +11,7 @@
 int check_for_data_type(Token *token);
 int check_for_identifier(Token *token);
 struct AST_FUNCTION_PARAMS* get_single_parameter(Token *token);
+int count_ast_func_contents(Token *token);
 int parse_parameter(Token *token, struct AST_FUNCTION_PARAMS **ast, int len);
 int get_num_function_params(Token *token);
 AST create_ast_main_function(Token *token);

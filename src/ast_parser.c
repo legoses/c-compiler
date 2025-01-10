@@ -49,6 +49,27 @@ int parse_parameter(Token *token, struct AST_FUNCTION_PARAMS **ast, int len) {
 }
 
 
+//dont worry about figuring out syntax yet, only count
+// for now, will just count semi colons, later will also watch for if statments, loops, anyting that doesnt end with semicolon
+int count_ast_func_contents(Token *token) {
+    int count = 0; //number of function contents
+    int itr = 0; //total iterations
+
+    while(Token_inc(token) != -1) {
+        enum token_names n = (*token->pos)->name;
+        if(n == SEMICOLON) {
+            count++;
+        }
+        itr++;
+
+    }
+
+    Token_dec_num(token, itr);
+
+    return count;
+}
+
+
 int get_num_function_params(Token *token) {
     Token_inc(token); //iterate token. Make sure it lands on an opening paramenesis for function parameters
     int num = 0; // number of parameters found
@@ -100,17 +121,37 @@ int get_num_function_params(Token *token) {
 }
 
 
+
+// whhle interpreting lines, it may be important to read until logical conclusion (like semicolon, or closing bracker/ paranthese)
+// instead of having rigid definition of what everything should be
 AST create_ast_main_function(Token *token) {
-    AST *a = NULL;
+    //AST *a = NULL;
     int numParam = get_num_function_params(token);
+    int numContent = count_ast_func_contents(token);
 
     //get number of parameters
     //figure out how many items are in the function
     //allocate memory
 
     if (numParam >= 0) {
-        a = (AST*)malloc(sizeof(AST));
-        a->type = MAIN_FUNCTION;
+        AST *a = (AST*)malloc(sizeof(AST));
+        //a->type = MAIN_FUNCTION;
+        a = {
+            MAIN_FUNCTION,
+            {
+                .AST_FUNCTION = (struct AST_FUNCTION) {
+                    .param_count = numParam,
+                    .content_count = numContent
+                    .type = (char*)malloc(sizeof(char)*4), // int + null terminator
+                    .name = (char*)malloc(sizeof(char)*5),  //main + null terinator
+                    .parameters = (struct AST_FUNCTION_PARAMS**)malloc(sizeof(struct AST_FUNCTION_PARAMS*)),
+                    .contents = (AST**)malloc(sizeof(AST*) * numContent),
+                }
+            }
+        }
+
+        strncpy(a->data.AST_FUNCTION->type, "int\0", 4);
+        strncpy(a->data.AST_FUNCTION->name, "name\0", 5);
         
         parse_parameter(token, a->data.AST_FUNCTION.parameters, numParam);
 
